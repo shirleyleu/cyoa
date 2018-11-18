@@ -38,16 +38,15 @@ func (h storyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if dest == "" {
 		dest = "intro"
 	}
-	v, ok := h.story[dest]
-	if !ok {
-		w.WriteHeader(http.StatusNotFound)
+	if v, ok := h.story[dest]; ok {
+		err := tmpl.Execute(w, v)
+		if err !=nil {
+			http.Error(w, "Something went wrong...", http.StatusInternalServerError)
+			log.Printf("tmpl.Execute: %s", err)
+		}
 		return
 	}
-	err := tmpl.Execute(w, v)
-	if err !=nil {
-		log.Printf("tmpl.Execute: %s", err)
-		return
-	}
+	http.Error(w, "Chapter not found.",http.StatusNotFound)
 }
 
 func main() {
